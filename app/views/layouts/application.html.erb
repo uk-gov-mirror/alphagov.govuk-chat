@@ -15,6 +15,7 @@
 <!DOCTYPE html>
 <%= tag.html(class: html_classes, lang: "en") do %>
   <head>
+    <%= action_cable_meta_tag %>
     <meta charset="utf-8">
     <title><%= browser_title %><%= browser_title ? " - " : "" %>GOV.UK Chat</title>
 
