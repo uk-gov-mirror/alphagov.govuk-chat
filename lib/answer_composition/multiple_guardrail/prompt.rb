@@ -32,6 +32,17 @@ module AnswerComposition::MultipleGuardrail
       end
     end
 
+    def json_schema
+      if Checker.bedrock_model == :claude_sonnet_4_0
+        raise NotImplementedError, "Structured responses are not supported for claude_sonnet_4_0"
+      end
+
+      schema = prompts.fetch(:json_schema)
+      enum_values = (1..guardrails.length).to_a
+      schema.fetch("schema").fetch("items")["enum"] = enum_values
+      schema
+    end
+
   private
 
     attr_reader :prompts

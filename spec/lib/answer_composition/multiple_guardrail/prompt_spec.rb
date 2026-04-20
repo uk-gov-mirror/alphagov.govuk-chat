@@ -26,20 +26,31 @@ RSpec.describe AnswerComposition::MultipleGuardrail::Prompt do
       "unique_answer_guardrail" => "This is a unique answer guardrail",
     }
   end
+  let(:json_schema) do
+    {
+      "type" => "json_schema",
+      "schema" => {
+        "type" => "array",
+        "items" => { "type" => "integer" },
+      },
+    }
+  end
   let(:guardrails_config) do
     {
       system_prompt:,
       user_prompt:,
       guardrails:,
       guardrail_definitions:,
+      json_schema:,
     }.with_indifferent_access
   end
 
   shared_examples "a prompt with guardrails" do |llm_prompt_name|
+    let(:model) { AnswerComposition::MultipleGuardrail::Checker::DEFAULT_MODEL }
     before do
       allow(AnswerComposition::Pipeline::Prompts)
         .to receive(:config)
-        .with(llm_prompt_name, AnswerComposition::MultipleGuardrail::Checker::DEFAULT_MODEL)
+        .with(llm_prompt_name, model)
         .and_return(guardrails_config)
     end
 
@@ -84,6 +95,27 @@ RSpec.describe AnswerComposition::MultipleGuardrail::Prompt do
         expect(guardrails.third)
           .to be_a(AnswerComposition::MultipleGuardrail::Prompt::Guardrail)
           .and have_attributes(key: 3, name: "unique_answer_guardrail", content: "This is a unique answer guardrail")
+      end
+    end
+
+    describe "#json_schema" do
+      it "returns the correct JSON schema with the enum values based on the guardrail count" do
+        actual_schema = described_class.new(llm_prompt_name).json_schema
+        enum_values = (1..guardrails.length).to_a
+
+        expected_json_schema = json_schema
+        expected_json_schema["schema"]["items"]["enum"] = enum_values
+        expect(actual_schema).to eq(expected_json_schema)
+      end
+
+      context "when the model is claude_sonnet_4_0" do
+        let(:model) { :claude_sonnet_4_0 }
+
+        it "raises NotImplementedError" do
+          allow(AnswerComposition::MultipleGuardrail::Checker).to receive(:bedrock_model).and_return(model)
+          prompt = described_class.new(llm_prompt_name)
+          expect { prompt.json_schema }.to raise_error(NotImplementedError)
+        end
       end
     end
   end

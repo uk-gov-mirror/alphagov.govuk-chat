@@ -163,7 +163,7 @@ module StubClaudeMessages
   end
 
   def stub_claude_output_guardrails(to_check,
-                                    response = "False | None",
+                                    response = [].to_json,
                                     chat_options: { bedrock_model: :claude_haiku_4_5 })
     system = array_including(a_hash_including("cache_control" => { "type" => "ephemeral" }))
 
