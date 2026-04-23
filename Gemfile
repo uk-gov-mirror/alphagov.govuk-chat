@@ -23,7 +23,7 @@ gem "gds-api-adapters"
 gem "gds-sso"
 gem "google-cloud-bigquery", require: false
 gem "govuk_app_config"
-gem "govuk_chat_private", github: "alphagov/govuk_chat_private"
+gem "govuk_chat_private", github: "alphagov/govuk_chat_private", branch: "add-sonnet-4-5-prompts-to-structured-answers-config"
 gem "govuk_message_queue_consumer"
 gem "govuk_publishing_components"
 gem "govuk_sidekiq"

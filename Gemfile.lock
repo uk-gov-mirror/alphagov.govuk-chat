@@ -1,6 +1,7 @@
 GIT
   remote: https://github.com/alphagov/govuk_chat_private.git
-  revision: ce0a54bd804492e14e31b1fb240d6e1f96d02676
+  revision: f558c7113ac6be27e902901b946139ce9089eb1f
+  branch: add-sonnet-4-5-prompts-to-structured-answers-config
   specs:
     govuk_chat_private (0.0.1)
       activesupport (>= 8)
