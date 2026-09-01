@@ -1,6 +1,7 @@
 GIT
   remote: https://github.com/alphagov/govuk_chat_private.git
-  revision: 709105759148c97f2e1f017340530bf4465b8c27
+  revision: 85d4050184228fc18f6404fdcc9f2fc665272f72
+  branch: 904-add-request-type-prompt
   specs:
     govuk_chat_private (0.0.1)
       activesupport (>= 8)
