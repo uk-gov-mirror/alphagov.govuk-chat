@@ -36,6 +36,11 @@ module AnswerComposition::Pipeline
       }
 
       context.answer.assign_llm_response("structured_answer", llm_response_with_link_token_mapping)
+
+      if response.stop_reason == :refusal
+        context.abort_pipeline_as_refused!(metrics: { "structured_answer" => build_metrics(start_time, response) })
+      end
+
       tool_output = claude_first_tool_use(response).input
       answer_completeness = tool_output[:answer_completeness]
       answered = %w[complete partial].include?(answer_completeness.downcase)

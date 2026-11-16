@@ -87,11 +87,13 @@ module StubClaudeMessages
 
   def stub_claude_question_rephrasing(original_question,
                                       rephrased_question,
+                                      stop_reason: :end_turn,
                                       with_thinking_block: false,
                                       chat_options: { bedrock_model: AnswerComposition::Pipeline::QuestionRephraser::DEFAULT_MODEL })
     stub_claude_messages_response(
       array_including({ "role" => "user", "content" => a_string_including(original_question) }),
-      content: [claude_messages_text_block(rephrased_question)],
+      content: stop_reason == :refusal ? [] : [claude_messages_text_block(rephrased_question)],
+      stop_reason:,
       with_thinking_block:,
       chat_options: chat_options,
     )
@@ -112,12 +114,15 @@ module StubClaudeMessages
 
     system = array_including(a_hash_including("cache_control" => { "type" => "ephemeral" }))
 
+    content = if stop_reason == :refusal
+                []
+              else
+                [claude_messages_tool_use_block(input: tool_input, name: tool_name)]
+              end
+
     stub_claude_messages_response(
       question_or_history,
-      content: [claude_messages_tool_use_block(
-        input: tool_input,
-        name: tool_name,
-      )],
+      content:,
       system:,
       stop_reason:,
       usage: { cache_read_input_tokens: 20 },
@@ -130,6 +135,7 @@ module StubClaudeMessages
                                     answer,
                                     sources_used: %w[link_1],
                                     answer_completeness: "complete",
+                                    stop_reason: :tool_use,
                                     with_thinking_block: false,
                                     chat_options: { bedrock_model: AnswerComposition::Pipeline::StructuredAnswerComposer::DEFAULT_MODEL })
     model = chat_options[:bedrock_model]
@@ -159,14 +165,20 @@ module StubClaudeMessages
       { "type" => "text", "text" => "Dynamic portion" },
     )
 
+    content = if stop_reason == :refusal
+                []
+              else
+                [claude_messages_tool_use_block(
+                  input: { answer:, sources_used:, answer_completeness: },
+                  name: "output_schema",
+                )]
+              end
+
     stub_claude_messages_response(
       question_or_history,
-      content: [claude_messages_tool_use_block(
-        input: { answer:, sources_used:, answer_completeness: },
-        name: "output_schema",
-      )],
+      content:,
       system:,
-      stop_reason: :tool_use,
+      stop_reason:,
       usage: { cache_read_input_tokens: 20 },
       with_thinking_block:,
       chat_options:,
