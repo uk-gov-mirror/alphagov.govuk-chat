@@ -11,6 +11,8 @@ module AnswerComposition::MultipleGuardrail
       end
     end
 
+    class RefusalError < ResponseError; end
+
     MAX_TOKENS = 100
     SUPPORTED_MODELS = %i[claude_haiku_4_5].freeze
     DEFAULT_MODEL = :claude_haiku_4_5
@@ -41,6 +43,18 @@ module AnswerComposition::MultipleGuardrail
           format: json_schema,
         },
       ))
+
+      if response.stop_reason == :refusal
+        raise RefusalError.new(
+          "Claude refused to check the guardrails",
+          response.to_h,
+          nil,
+          response[:usage][:input_tokens],
+          response[:usage][:output_tokens],
+          response[:usage][:cache_read_input_tokens],
+          response.model,
+        )
+      end
 
       llm_guardrail_result = JSON.parse(claude_first_text_content(response).text)
 
